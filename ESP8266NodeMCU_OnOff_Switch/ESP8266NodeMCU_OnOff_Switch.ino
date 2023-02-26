@@ -10,7 +10,13 @@ IPAddress subnet(255, 255, 255, 0); //wifi subnet
 
 ESP8266WebServer server(80);
 
+const int relayPin = D1;
+
 void setup() {
+  pinMode(relayPin, OUTPUT);
+  digitalWrite(relayPin, HIGH); //relay off
+  
+  
   Serial.begin(115200);
   delay(100);
 
@@ -36,6 +42,8 @@ void setup() {
   delay(100);
   
   server.on("/", handle_OnConnect);
+  server.on("/on", handle_On);
+  server.on("/off", handle_Off);
   server.onNotFound(handle_NotFound);
   
   Serial.println();
@@ -43,13 +51,23 @@ void setup() {
   server.begin();
   Serial.println("HTTP server started");
 
-  
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   server.handleClient();
 }
+
+void handle_On() {
+  digitalWrite(relayPin, LOW);
+  server.send(200, "text/html", SendHTML()); 
+}
+
+void handle_Off() {
+  digitalWrite(relayPin, HIGH);
+  server.send(200, "text/html", SendHTML()); 
+}
+
 
 void handle_OnConnect() {
   Serial.println("GPIO7 Status: OFF | GPIO6 Status: OFF");
@@ -78,7 +96,8 @@ String SendHTML(){
   ptr +="<body>\n";
   ptr +="<h1>My ESP8266 Web Server</h1>\n";
   ptr +="<h3>Using Station Mode</h3>\n";
-  ptr +="<button>OK</button>\n";
+  ptr +="<a href='/on'>ON</a>\n";
+  ptr +="<a href='/off'>OFF</a>\n";
   ptr +="</body>\n";
   ptr +="</html>\n";
 
