@@ -2,7 +2,7 @@
 #include <ESP8266WebServer.h>
 #include <WiFiClient.h>
 #include <ESP8266HTTPClient.h>
-#include <WiFiClientSecureBearSSL.h>
+#include <WiFiClientSecure.h>
 
 const char* _ssid = "your_wifi_ssid";//type your ssid
 const char* _password = "your_wifi_password";//type your password
@@ -10,12 +10,13 @@ const char* _password = "your_wifi_password";//type your password
 IPAddress _ip(192, 168, 1, 180); //static IP address to be used in the current subnet 
 IPAddress _gateway(192, 168, 1, 1); //wifi router gateway address
 IPAddress _subnet(255, 255, 255, 0); //wifi subnet
-IPAddress _dns(8, 8, 8, 8); //set google as DNS
+IPAddress _dns(8, 8, 8, 8); //set google as DNS server
 
 //REST API TLS SHA-1 fingerprint
-const uint8_t _apiFingerprint[20] = {0xc2, 0x47, 0x0e, 0xcd, 0xb5, 0x3c, 0x01, 0x70, 0x2e, 0x80, 0x68, 0xf6, 0x70, 0x62, 0x7a, 0xf7, 0xe6, 0xee, 0x86, 0xf3};
-String _apiUrl = "https://v2.jokeapi.dev/joke/Any";
+const char* _apiFingerPrint = "c2:47:0e:cd:b5:3c:01:70:2e:80:68:f6:70:62:7a:f7:e6:ee:86:f3";
+const char* _apiUrl = "https://v2.jokeapi.dev/joke/Any";
 
+//create server
 ESP8266WebServer _server(80);
 
 void setup() {
@@ -39,10 +40,8 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   _server.handleClient();
 
- // getDataFromApi();
 }
 
 void handleHome() {
@@ -53,7 +52,6 @@ void handleHome() {
 
 void connectToWifi(){
   // Connect to WiFi network
-  Serial.println();
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(_ssid);
@@ -82,12 +80,12 @@ String getDataFromApi(){
   
   Serial.println("Beginning HTTP Client");
 
-  std::unique_ptr<BearSSL::WiFiClientSecure> wifiClient(new BearSSL::WiFiClientSecure);
-  wifiClient->setFingerprint(_apiFingerprint);
-
+  WiFiClientSecure wifiClient;
+  wifiClient.setFingerprint(_apiFingerPrint);
+  
   HTTPClient httpClient;
   
-  bool isConnected = httpClient.begin(*wifiClient, _apiUrl);
+  bool isConnected = httpClient.begin(wifiClient, _apiUrl);
 
   if(!isConnected){
     Serial.println("HttpClient failed to connect");
