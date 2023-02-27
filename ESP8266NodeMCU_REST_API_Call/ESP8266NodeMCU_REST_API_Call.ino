@@ -9,6 +9,7 @@ const char* _password = "your_wifi_password";//type your password
 IPAddress _ip(192, 168, 1, 180); //static IP address to be used in the current subnet 
 IPAddress _gateway(192, 168, 1, 1); //wifi router gateway address
 IPAddress _subnet(255, 255, 255, 0); //wifi subnet
+IPAddress _dns(8, 8, 8, 8); //set google as DNS
 
 ESP8266WebServer _server(80);
 
@@ -40,7 +41,7 @@ void loop() {
 }
 
 void handleHome() {
-  String result = getDataFromApi("http://192.168.1.161:5000/health");
+  String result = getDataFromApi("http://worldclockapi.com/api/json/est/now");
   _server.send(200, "text/html", result); 
 }
 
@@ -53,7 +54,7 @@ void connectToWifi(){
   Serial.println(_ssid);
 
   WiFi.mode(WIFI_STA);
-  WiFi.config(_ip, _gateway, _subnet); 
+  WiFi.config(_ip, _gateway, _subnet, _dns); 
   WiFi.begin(_ssid, _password);
    
   while (WiFi.status() != WL_CONNECTED) {
@@ -89,7 +90,7 @@ String getDataFromApi(String url){
   int httpCode = httpClient.GET(); //send a GET request
 
   if(httpCode != HTTP_CODE_OK){
-    Serial.printf("[HTTP] GET... failed, error: %s\n", httpClient.errorToString(httpCode).c_str());
+    Serial.printf("[HTTP] GET... failed, error: %d, %s\n", httpCode, httpClient.errorToString(httpCode).c_str());
     return "{\"result\":\"error\"}";
   }
 
