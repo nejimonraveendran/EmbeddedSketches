@@ -15,6 +15,10 @@ const char* _mqttPassword = "your_hive_mq_password";
 const char* _clientId = "myesp8266";
 const char* _topic = "myapp/topic1";
 
+//get certificate: openssl s_client -showcerts -connect <your_mqtt_server>:<port> > server_cert.pem    
+//get fingerprint and dates from certificate: openssl x509 -in server_cert.pem -noout -sha1 -fingerprint -dates
+const char* _sha1CertFingerPrint = "AB:E6:FC:82:94:69:B9:22:EF:09:AF:22:4C:61:76:37:62:F8:1A:6C"; 
+
 WiFiClientSecure _wifiClient;
 PubSubClient _mqttClient(_wifiClient);
 
@@ -28,8 +32,9 @@ void setup() {
   
   connectToWifi();
 
-  _wifiClient.setInsecure(); //accept all certs sent by server.  NodeMCU does not support certificate verification because of low memory.
-  
+  //_wifiClient.setInsecure(); //accept all certs sent by server.  NodeMCU does not support certificate verification because of low memory.
+    _wifiClient.setFingerprint(_sha1CertFingerPrint);
+
   _mqttClient.setServer(_mqttServer, _mqttPort);
   _mqttClient.setCallback(messageReceivedHandler);
 
@@ -70,7 +75,7 @@ void connectToWifi(){
 }
 
 //
-void connectToMqttServer() {
+void connectToMqttServer() {  
   // Loop until we're reconnected
   while (!_mqttClient.connected()) {
     Serial.println("Attempting MQTT connection...");
