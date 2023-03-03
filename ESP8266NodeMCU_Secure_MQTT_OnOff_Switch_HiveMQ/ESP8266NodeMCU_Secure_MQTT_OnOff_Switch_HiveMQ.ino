@@ -1,18 +1,18 @@
-#include <WiFiClient.h>
 #include <ESP8266WiFi.h>
+#include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 
 const char* _ssid = "your_wifi_ssid";//type your ssid
 const char* _password = "your_wifi_password";//type your password
 
 //MQTT server settings.
-const char* _mqttServer = "your_mqtt_server"; //eg. m23.cloudmqtt.com
-const int _mqttPort = 15038; //change to your mqtt server port
-const char* _mqttUserName = "your_mqtt_username";
-const char* _mqttPassword = "your_mqtt_password";
-const char* _topic = "your_mqtt_topic";
+const char* _mqttServer = "your_hive_mq_host_name"; //eg. 13efdrer.s2.eu.hivemq.cloud
+const int _mqttPort = 8883; //change to your hive mqtt server port
+const char* _mqttUserName = "your_hive_mq_username";
+const char* _mqttPassword = "your_hive_mq_password";
+const char* _topic = "myapp/topic1";
 
-WiFiClient _wifiClient;
+WiFiClientSecure _wifiClient;
 PubSubClient _mqttClient(_wifiClient);
 
 const int _relayPin = D1;
@@ -24,6 +24,8 @@ void setup() {
   Serial.begin(115200);
   
   connectToWifi();
+
+  _wifiClient.setInsecure(); //accept all certs sent by server.  NodeMCU does not support certificate verification because of low memory.
   
   _mqttClient.setServer(_mqttServer, _mqttPort);
   _mqttClient.setCallback(messageReceivedHandler);
@@ -113,5 +115,4 @@ void messageReceivedHandler(char* topic, byte* payload, unsigned int length) {
 void publishMessage(const char* topic, const char* message){
   _mqttClient.publish(topic, message); 
 }
-
 
