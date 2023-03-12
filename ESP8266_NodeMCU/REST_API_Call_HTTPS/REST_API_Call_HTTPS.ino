@@ -1,8 +1,5 @@
-#include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-#include <WiFiClient.h>
 #include <ESP8266HTTPClient.h>
-#include <WiFiClientSecure.h>
 
 const char* _ssid = "your_wifi_ssid";//type your ssid
 const char* _password = "your_wifi_password";//type your password
